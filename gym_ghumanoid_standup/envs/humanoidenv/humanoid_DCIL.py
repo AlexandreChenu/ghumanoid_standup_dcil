@@ -16,8 +16,8 @@ from abc import ABC
 from abc import abstractmethod
 from typing import Optional
 
-from humanoidenv import HumanoidStandupEnv
-# from .humanoidenv import HumanoidStandupEnv
+# from humanoidenv import HumanoidStandupEnv
+from .humanoidenv import HumanoidStandupEnv
 
 from typing import Union
 from gym import utils, spaces
@@ -56,6 +56,85 @@ if torch.cuda.is_available():
   device = torch.device("cuda")
 else:
   device = torch.device("cpu")
+
+class Humanoid(mujoco_env.MujocoEnv, utils.EzPickle, ABC):
+	TARGET_SHAPE = 0
+	MAX_PIX_VALUE = 0
+
+	def __init__(self):
+
+		self.env = HumanoidStandupEnv(
+		)
+
+		self.action_space = self.env.action_space
+
+		self.observation_space = self.env.observation_space
+
+		self.set_reward_function(default_reward_fun)
+
+		init_state = self.env.reset()
+		self.init_state = init_state.copy()
+
+		self.init_sim_state = self.env.sim.get_state()
+		self.init_qpos = self.init_sim_state.qpos.copy()
+		self.init_qvel = self.init_sim_state.qvel.copy()
+
+		self.render_cache = defaultdict(dict)
+
+		self.state = self.init_state.copy()
+		self.done = False
+		self.steps = 0
+
+		self.max_episode_steps = 100
+
+		self.rooms = []
+
+		# self.viewer = mujoco_py.MjViewer(self.env.sim)
+
+	def __getattr__(self, e):
+		assert self.env is not self
+		return getattr(self.env, e)
+
+	def set_reward_function(self, reward_function):
+		self.compute_reward = (
+			reward_function  # the reward function is not defined by the environment
+		)
+
+	def reset_model(self, env_indices=None) -> np.ndarray:
+		"""
+		Reset environments to initial simulation state & return vector state
+		"""
+		self.env.sim.set_state(self.init_sim_state)
+
+		return self.state_vector()
+
+	def reset(self, options=None, seed: Optional[int] = None, infos=None):
+		self.reset_model()
+		self.steps = 0
+		return self.state_vector()
+
+	def reset_done(self, options=None, seed: Optional[int] = None, infos=None):
+		self.reset_model()
+		self.steps = 0
+		return self.state_vector()
+
+	def step(self, action):
+		self.steps += 1
+		new_obs, reward, done, info =  self.env.step(action)
+		self.done = done
+		truncation = (self.steps > self.max_episode_steps)
+		self.done = (self.done or truncation)
+		return self.state_vector(), reward, self.done, info
+
+
+	def state_vector(self):
+		return self.state.copy()
+
+	def render(self):
+		return self.env.render()
+
+	def plot(self, ax):
+		pass
 
 
 class GoalEnv(gym.Env):
@@ -253,7 +332,10 @@ class GHumanoidGoal(GHumanoid, GoalEnv, utils.EzPickle, ABC):
 		self.steps += 1
 		cur_state = self.state.copy()
 
-		new_state, _, done, info =  self.env.step(action)
+		new_state, _, _, info =  self.env.step(action)
+
+		done = False
+		
 		# print("step : ", self.project_to_goal_space(new_state))
 		self.state = new_state
 		reward = self.compute_reward(self.project_to_goal_space(new_state), self.goal, {})

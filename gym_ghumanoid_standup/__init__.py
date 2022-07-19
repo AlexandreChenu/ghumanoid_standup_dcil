@@ -9,20 +9,28 @@ def envpath():
     resdir = os.path.join(os.path.dirname(__file__))
     return resdir
 
+print("gym-humanoid: ")
+print("|    gym version and path:", gym.__version__, gym.__path__)
+
+print("|    REGISTERING Humanoid_standup-v0 from", envpath())
+register(
+    id="Humanoid_standup-v0",
+    entry_point="gym_ghumanoid_standup.envs:Humanoid",
+)
 
 print("gym-ghumanoid: ")
 print("|    gym version and path:", gym.__version__, gym.__path__)
 
-print("|    REGISTERING GHumanoid-v0 from", envpath())
+print("|    REGISTERING GHumanoid_standup-v0 from", envpath())
 register(
-    id="GHumanoid-v0",
-    entry_point="gym_ghumanoid.envs:GHumanoid",
+    id="GHumanoid_standup-v0",
+    entry_point="gym_ghumanoid_standup.envs:GHumanoid",
 )
 
-print("|    REGISTERING GHumanoidGoal-v0 from", envpath())
+print("|    REGISTERING GHumanoidGoal_standup-v0 from", envpath())
 register(
-    id="GHumanoidGoal-v0",
-    entry_point="gym_ghumanoid.envs:GHumanoidGoal",
+    id="GHumanoidGoal_standup-v0",
+    entry_point="gym_ghumanoid_standup.envs:GHumanoidGoal",
 )
 
 # print("|    REGISTERING GFetchDCIL-v0 from", envpath())

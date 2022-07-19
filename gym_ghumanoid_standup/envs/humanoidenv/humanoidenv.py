@@ -41,7 +41,7 @@ class HumanoidStandupEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 		data = self.sim.data
 		return np.concatenate(
 			[
-				data.qpos.flat[2:],
+				data.qpos.flat,
 				data.qvel.flat,
 				data.cinert.flat,
 				data.cvel.flat,

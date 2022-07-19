@@ -1,1 +1,1 @@
-from gym_ghumanoid.envs.humanoidenv.humanoid_DCIL import GHumanoid, GHumanoidGoal#, GFetchDCIL
+from gym_ghumanoid_standup.envs.humanoidenv.humanoid_DCIL import Humanoid, GHumanoid, GHumanoidGoal#, GFetchDCIL
