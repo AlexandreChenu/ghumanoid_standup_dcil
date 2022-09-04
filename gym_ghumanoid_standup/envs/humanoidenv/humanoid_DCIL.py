@@ -332,10 +332,10 @@ class GHumanoidGoal(GHumanoid, GoalEnv, utils.EzPickle, ABC):
 		self.steps += 1
 		cur_state = self.state.copy()
 
-		new_state, _, _, info =  self.env.step(action)
+		new_state, env_reward, _, info =  self.env.step(action)
 
 		done = False
-		
+
 		# print("step : ", self.project_to_goal_space(new_state))
 		self.state = new_state
 		reward = self.compute_reward(self.project_to_goal_space(new_state), self.goal, {})
@@ -348,6 +348,7 @@ class GHumanoidGoal(GHumanoid, GoalEnv, utils.EzPickle, ABC):
 		truncation = truncation * (1 - is_success).reshape(1,)
 		info = {'is_success': is_success,
 				'done_from_env': np.array(done,dtype=np.intc).reshape(1,),
+				'reward_from_env': env_reward,
 				'truncation': truncation}
 		self.done = (done or bool(truncation)) or bool(is_success)
 
